@@ -1,4 +1,6 @@
 # Exclude peristent data directory
 working-data/
 
+tmp/
+cleanup.sh
 

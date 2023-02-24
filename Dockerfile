@@ -22,6 +22,17 @@ RUN sed -i -e 's/INTRASUFFIX=.*/INTRASUFFIX="-at"/g' /etc/koha/koha-sites.conf
 RUN sed -i -e 's/INTRAPORT="80"/INTRAPORT="8080"/g' /etc/koha/koha-sites.conf
 RUN sed -i -e 's/OPACPORT=.*/OPACPORT="80"/g' /etc/koha/koha-sites.conf
 
+# Setup koha hive13 user & make it happy with log dir permissions
+RUN groupadd -g 1001 hive13-koha && \
+    useradd hive13-koha -u 1001 -g 1001 -M && \
+    mkdir -p /var/log/koha/hive13 && \
+    chown -R 1001:1001 /var/log/koha/hive13 && \
+    chmod -R og+rw /var/log/koha/hive13 && \
+    mkdir -p /var/cache/koha/hive13 && \
+    chown -R 1001:1001 /var/cache/koha
+
+
+
 # Make apache also listen on port 8080 & fix annoying ServerName warning
 RUN echo "Listen 8080" >> /etc/apache2/ports.conf
 RUN echo "ServerName 127.0.0.1" >> /etc/apache2/apache2.conf
@@ -30,13 +41,8 @@ RUN echo "ServerName 127.0.0.1" >> /etc/apache2/apache2.conf
 RUN a2enmod rewrite cgi headers proxy_http deflate
 
 # Not sure why, but this is needed or mariadb won't properly start
-#RUN mysql_install_db
+#RUN mysql_install_db when no db is being used
 
-# edit /etc/apache2/sites-enabled/000-default.conf & set: ServerName library.hive13.org, then restart apache2
-#service mariadb start
-
-# Volumes:
-# /var/lib/mysql
-# /var/lib/koha
+ADD files/entrypoint.sh /opt/koha/entrypoint.sh
 
 EXPOSE 7001 7002 7003
