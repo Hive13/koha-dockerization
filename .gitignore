@@ -1,0 +1,4 @@
+# Exclude peristent data directory
+working-data/
+
+
